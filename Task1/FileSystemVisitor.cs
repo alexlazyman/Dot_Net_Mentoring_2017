@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Task1
 {
     public class FileSystemVisitor : IEnumerable<string>
     {
-        private string _path;
-        private bool _isVisitFinished;
+        private readonly string _path;
+        private readonly IDirectoryReader _directoryReader;
 
         public event EventHandler<FilterArgs> Filter;
 
@@ -27,18 +24,14 @@ namespace Task1
 
         public event EventHandler<VisitArgs> FilteredDirectoryFound;
 
-        public FileSystemVisitor(string path)
+        public FileSystemVisitor(string path, IDirectoryReader directoryReader = null)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-
-            this._path = path;
+            _path = path;
+            _directoryReader = directoryReader ?? new DirectoryReader();
         }
 
-        public FileSystemVisitor(string path, EventHandler<FilterArgs> filter)
-            : this(path)
+        public FileSystemVisitor(string path, EventHandler<FilterArgs> filter, IDirectoryReader directoryReader = null)
+            : this(path, directoryReader)
         {
             if (filter == null)
             {
@@ -50,31 +43,33 @@ namespace Task1
 
         public IEnumerator<string> GetEnumerator()
         {
-            _isVisitFinished = false;
+            var visitState = new VisitState();
+
             OnStart();
 
-            if (IsFile(_path))
+            if (_directoryReader.IsFile(_path))
             {
-                if (VisitFile(_path) == _path)
+                if (VisitFile(_path, visitState) == _path)
                 {
                     yield return _path;
                 }
             }
-            else
+            else if (_directoryReader.IsDirectory(_path))
             {
-                foreach (var path in VisitDirectory(_path))
+                foreach (var path in VisitDirectory(_path, visitState))
                 {
                     yield return path;
 
-                    if (_isVisitFinished)
+                    if (visitState.SearchFinished)
                     {
                         break;
                     }
                 }
             }
 
+            visitState.SearchFinished = true;
+
             OnFinish();
-            _isVisitFinished = true;
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -82,14 +77,14 @@ namespace Task1
             return GetEnumerator();
         }
 
-        private IEnumerable<string> VisitDirectory(string path)
+        private IEnumerable<string> VisitDirectory(string path, VisitState visitState)
         {
             var visitArgs = new VisitArgs(path);
 
             OnDirectoryFound(visitArgs);
             if (visitArgs.StopSearch)
             {
-                _isVisitFinished = true;
+                visitState.SearchFinished = true;
             }
 
             if (!IsFiltered(path))
@@ -100,33 +95,33 @@ namespace Task1
             OnFilteredDirectoryFound(visitArgs);
             if (visitArgs.StopSearch)
             {
-                _isVisitFinished = true;
+                visitState.SearchFinished = true;
             }
 
             yield return path;
 
-            foreach (var visitPath in Directory.EnumerateDirectories(path).SelectMany(VisitDirectory))
+            foreach (var visitPath in _directoryReader.GetDirectories(path).SelectMany(p => VisitDirectory(p, visitState)))
             {
                 yield return visitPath;
             }
 
-            foreach (var filePath in Directory.EnumerateFiles(path))
+            foreach (var filePath in _directoryReader.GetFiles(path))
             {
-                if (VisitFile(path) == filePath)
+                if (VisitFile(filePath, visitState) == filePath)
                 {
                     yield return filePath;
                 }
             }
         }
 
-        private string VisitFile(string path)
+        private string VisitFile(string path, VisitState visitState)
         {
             var visitArgs = new VisitArgs(path);
 
             OnFileFound(visitArgs);
             if (visitArgs.StopSearch)
             {
-                _isVisitFinished = true;
+                visitState.SearchFinished = true;
             }
 
             if (!IsFiltered(path))
@@ -137,7 +132,7 @@ namespace Task1
             OnFilteredFileFound(visitArgs);
             if (visitArgs.StopSearch)
             {
-                _isVisitFinished = true;
+                visitState.SearchFinished = true;
             }
 
             return path;
@@ -150,11 +145,6 @@ namespace Task1
             OnFilter(filterArgs);
 
             return !filterArgs.Exclude;
-        }
-
-        private bool IsFile(string path)
-        {
-            return new FileInfo(path).Exists;
         }
 
         #region Event calls
