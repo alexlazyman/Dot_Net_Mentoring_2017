@@ -5,12 +5,11 @@ using System.Linq;
 
 namespace Task1
 {
-    public class FileSystemVisitor : IEnumerable<string>
+    public class FileSystemVisitor : IFileSystemVisitor
     {
         private readonly string _path;
         private readonly IDirectoryReader _directoryReader;
-
-        public event EventHandler<FilterArgs> Filter;
+        private readonly Predicate<string> _filter;
 
         public event EventHandler Start;
 
@@ -24,21 +23,11 @@ namespace Task1
 
         public event EventHandler<VisitArgs> FilteredDirectoryFound;
 
-        public FileSystemVisitor(string path, IDirectoryReader directoryReader = null)
+        public FileSystemVisitor(string path, IDirectoryReader directoryReader, Predicate<string> filter = null)
         {
             _path = path;
-            _directoryReader = directoryReader ?? new DirectoryReader();
-        }
-
-        public FileSystemVisitor(string path, EventHandler<FilterArgs> filter, IDirectoryReader directoryReader = null)
-            : this(path, directoryReader)
-        {
-            if (filter == null)
-            {
-                throw new ArgumentNullException(nameof(filter));
-            }
-
-            Filter += filter;
+            _directoryReader = directoryReader;
+            _filter = filter;
         }
 
         public IEnumerator<string> GetEnumerator()
@@ -140,115 +129,39 @@ namespace Task1
 
         private bool IsFiltered(string path)
         {
-            var filterArgs = new FilterArgs(path);
-
-            OnFilter(filterArgs);
-
-            return !filterArgs.Exclude;
+            return _filter == null || _filter(path);
         }
 
         #region Event calls
 
-        private void OnFilter(FilterArgs args)
-        {
-            if (Filter == null)
-            {
-                return;
-            }
-
-            var handlers = Filter.GetInvocationList();
-            foreach (EventHandler<FilterArgs> handler in handlers)
-            {
-                handler.Invoke(this, args);
-                if (args.Exclude)
-                {
-                    return;
-                }
-            }
-        }
-
         private void OnStart()
         {
-            if (Start == null)
-            {
-                return;
-            }
-
-            var handlers = Start.GetInvocationList();
-            foreach (EventHandler handler in handlers)
-            {
-                handler.Invoke(this, null);
-            }
+            Start.Run(this, null);
         }
 
         private void OnFinish()
         {
-            if (Finish == null)
-            {
-                return;
-            }
-
-            var handlers = Finish.GetInvocationList();
-            foreach (EventHandler handler in handlers)
-            {
-                handler.Invoke(this, null);
-            }
+            Finish.Run(this, null);
         }
 
         private void OnFileFound(VisitArgs args)
         {
-            if (FileFound == null)
-            {
-                return;
-            }
-
-            var handlers = FileFound.GetInvocationList();
-            foreach (EventHandler<VisitArgs> handler in handlers)
-            {
-                handler.Invoke(this, args);
-            }
+            FileFound.Run(this, args);
         }
 
         private void OnFilteredFileFound(VisitArgs args)
         {
-            if (FilteredFileFound == null)
-            {
-                return;
-            }
-
-            var handlers = FilteredFileFound.GetInvocationList();
-            foreach (EventHandler<VisitArgs> handler in handlers)
-            {
-                handler.Invoke(this, args);
-            }
+            FilteredFileFound.Run(this, args);
         }
 
         private void OnDirectoryFound(VisitArgs args)
         {
-            if (DirectoryFound == null)
-            {
-                return;
-            }
-
-            var handlers = DirectoryFound.GetInvocationList();
-            foreach (EventHandler<VisitArgs> handler in handlers)
-            {
-                handler.Invoke(this, args);
-            }
+            DirectoryFound.Run(this, args);
         }
 
         private void OnFilteredDirectoryFound(VisitArgs args)
         {
-            if (FilteredDirectoryFound == null)
-            {
-                return;
-            }
-
-            var handlers = FilteredDirectoryFound.GetInvocationList();
-            foreach (EventHandler<VisitArgs> handler in handlers)
-            {
-                handler.Invoke(this, args);
-            }
+            FilteredDirectoryFound.Run(this, args);
         }
 
         #endregion

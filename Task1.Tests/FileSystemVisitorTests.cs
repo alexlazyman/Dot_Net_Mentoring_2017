@@ -1,12 +1,8 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Moq;
-using NUnit.Framework.Internal.Execution;
 
 namespace Task1.Tests
 {
@@ -16,7 +12,7 @@ namespace Task1.Tests
         private const string StartPath = "top";
         private readonly Mock<IDirectoryReader> _directoryReaderMock = new Mock<IDirectoryReader>();
 
-        private readonly Mock<EventHandler<FilterArgs>> _filterEventHandlerMock = new Mock<EventHandler<FilterArgs>>();
+        private readonly Mock<Predicate<string>> _filterMock = new Mock<Predicate<string>>();
         private readonly Mock<EventHandler> _startEventHandlerMock = new Mock<EventHandler>();
         private readonly Mock<EventHandler> _finishEventHandlerMock = new Mock<EventHandler>();
         private readonly Mock<EventHandler<VisitArgs>> _fileFoundEventHandlerMock = new Mock<EventHandler<VisitArgs>>();
@@ -30,15 +26,16 @@ namespace Task1.Tests
         [SetUp]
         public void SetUp()
         {
-            _fileSystemVisitor = new FileSystemVisitor(StartPath, _directoryReaderMock.Object);
+            _fileSystemVisitor = new FileSystemVisitor(StartPath, _directoryReaderMock.Object, _filterMock.Object);
 
-            _fileSystemVisitor.Filter += _filterEventHandlerMock.Object;
             _fileSystemVisitor.Start += _startEventHandlerMock.Object;
             _fileSystemVisitor.Finish += _finishEventHandlerMock.Object;
             _fileSystemVisitor.FileFound += _fileFoundEventHandlerMock.Object;
             _fileSystemVisitor.FilteredFileFound += _filteredFileFoundEventHandlerMock.Object;
             _fileSystemVisitor.DirectoryFound += _directoryFoundEventHandlerMock.Object;
             _fileSystemVisitor.FilteredDirectoryFound += _filteredDirectoryFoundEventHandlerMock.Object;
+
+            _filterMock.SetReturnsDefault(true);
         }
 
         [TearDown]
@@ -46,14 +43,12 @@ namespace Task1.Tests
         {
             _directoryReaderMock.Reset();
 
-            _filterEventHandlerMock.Reset();
+            _filterMock.Reset();
             _startEventHandlerMock.Reset();
             _finishEventHandlerMock.Reset();
             _fileFoundEventHandlerMock.Reset();
-            _fileFoundEventHandlerMock.ResetCalls();
             _filteredFileFoundEventHandlerMock.Reset();
             _filteredFileFoundEventHandlerMock.ResetCalls();
-            _directoryFoundEventHandlerMock.Reset();
             _filteredDirectoryFoundEventHandlerMock.Reset();
         }
 
@@ -117,9 +112,9 @@ namespace Task1.Tests
             _directoryReaderMock.Setup(r => r.GetDirectories(StartPath)).Returns(NoDirs);
             _directoryReaderMock.Setup(r => r.GetFiles(StartPath)).Returns(files);
 
-            _filterEventHandlerMock
-                .Setup(h => h(It.IsAny<FileSystemVisitor>(), It.Is<FilterArgs>(args => args.Path == files[0])))
-                .Callback((object s, FilterArgs args) => args.Exclude = false)
+            _filterMock
+                .Setup(h => h(It.Is<string>(path => path == files[0])))
+                .Returns(true)
                 .Verifiable();
             _fileFoundEventHandlerMock
                 .Setup(h => h(It.IsAny<FileSystemVisitor>(), It.Is<VisitArgs>(args => args.Path == files[0])))
@@ -133,7 +128,7 @@ namespace Task1.Tests
             var actualItems = _fileSystemVisitor.ToArray();
 
             CollectionAssert.AreEqual(expectedItems, actualItems);
-            _filterEventHandlerMock.Verify();
+            _filterMock.Verify();
             _fileFoundEventHandlerMock.Verify();
             _filteredFileFoundEventHandlerMock.Verify();
         }
@@ -148,9 +143,9 @@ namespace Task1.Tests
             _directoryReaderMock.Setup(r => r.GetDirectories(StartPath)).Returns(NoDirs);
             _directoryReaderMock.Setup(r => r.GetFiles(StartPath)).Returns(files);
 
-            _filterEventHandlerMock
-                .Setup(h => h(It.IsAny<FileSystemVisitor>(), It.Is<FilterArgs>(args => args.Path == files[0])))
-                .Callback((object s, FilterArgs args) => args.Exclude = true)
+            _filterMock
+                .Setup(h => h(It.Is<string>(path => path == files[0])))
+                .Returns(false)
                 .Verifiable();
             _fileFoundEventHandlerMock
                 .Setup(h => h(It.IsAny<FileSystemVisitor>(), It.Is<VisitArgs>(args => args.Path == files[0])))
@@ -164,7 +159,7 @@ namespace Task1.Tests
             var actualItems = _fileSystemVisitor.ToArray();
 
             CollectionAssert.AreEqual(expectedItems, actualItems);
-            _filterEventHandlerMock.Verify();
+            _filterMock.Verify();
             _fileFoundEventHandlerMock.Verify();
             _filteredFileFoundEventHandlerMock.Verify(h => h(It.IsAny<FileSystemVisitor>(), It.IsAny<VisitArgs>()), Times.Never);
         }
@@ -179,9 +174,9 @@ namespace Task1.Tests
             _directoryReaderMock.Setup(r => r.GetDirectories(StartPath)).Returns(dirs);
             _directoryReaderMock.Setup(r => r.GetFiles(StartPath)).Returns(NoFiles);
 
-            _filterEventHandlerMock
-                .Setup(h => h(It.IsAny<FileSystemVisitor>(), It.Is<FilterArgs>(args => args.Path == dirs[0])))
-                .Callback((object s, FilterArgs args) => args.Exclude = false)
+            _filterMock
+                .Setup(h => h(It.Is<string>(path => path == dirs[0])))
+                .Returns(true)
                 .Verifiable();
             _directoryFoundEventHandlerMock
                 .Setup(h => h(It.IsAny<FileSystemVisitor>(), It.Is<VisitArgs>(args => args.Path == dirs[0])))
@@ -195,7 +190,7 @@ namespace Task1.Tests
             var actualItems = _fileSystemVisitor.ToArray();
 
             CollectionAssert.AreEqual(expectedItems, actualItems);
-            _filterEventHandlerMock.Verify();
+            _filterMock.Verify();
             _directoryFoundEventHandlerMock.Verify();
             _filteredDirectoryFoundEventHandlerMock.Verify();
         }
@@ -210,9 +205,9 @@ namespace Task1.Tests
             _directoryReaderMock.Setup(r => r.GetDirectories(StartPath)).Returns(dirs);
             _directoryReaderMock.Setup(r => r.GetFiles(StartPath)).Returns(NoFiles);
 
-            _filterEventHandlerMock
-                .Setup(h => h(It.IsAny<FileSystemVisitor>(), It.Is<FilterArgs>(args => args.Path == dirs[0])))
-                .Callback((object s, FilterArgs args) => args.Exclude = true)
+            _filterMock
+                .Setup(h => h(It.Is<string>(path => path == dirs[0])))
+                .Returns(false)
                 .Verifiable();
             _filteredDirectoryFoundEventHandlerMock
                 .Setup(h => h(It.IsAny<FileSystemVisitor>(), It.Is<VisitArgs>(args => args.Path == dirs[0])))
@@ -226,7 +221,7 @@ namespace Task1.Tests
             var actualItems = _fileSystemVisitor.ToArray();
 
             CollectionAssert.AreEqual(expectedItems, actualItems);
-            _filterEventHandlerMock.Verify();
+            _filterMock.Verify();
             _directoryFoundEventHandlerMock.Verify();
             _filteredDirectoryFoundEventHandlerMock.Verify(h => h(It.IsAny<FileSystemVisitor>(), It.Is<VisitArgs>(args => args.Path == dirs[0])), Times.Never);
         }

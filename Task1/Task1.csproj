@@ -41,10 +41,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DirectoryReader.cs" />
+    <Compile Include="EventHandlerExtensions.cs" />
     <Compile Include="FileSystemVisitor.cs" />
     <Compile Include="IDirectoryReader.cs" />
+    <Compile Include="IFileSystemVisitor.cs" />
     <Compile Include="VisitArgs.cs" />
-    <Compile Include="FilterArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VisitState.cs" />
   </ItemGroup>
