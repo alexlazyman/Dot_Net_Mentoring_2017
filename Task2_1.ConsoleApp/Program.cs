@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Task2_1.ConsoleApp
 {
@@ -13,14 +9,7 @@ namespace Task2_1.ConsoleApp
             while (true)
             {
                 var str = Console.ReadLine();
-                if (string.IsNullOrEmpty(str))
-                {
-                    Console.WriteLine("Error: empty string");
-                }
-                else
-                {
-                    Console.WriteLine($"First: {str[0]}");
-                }
+                Console.WriteLine(string.IsNullOrEmpty(str) ? "Error: empty string" : $"First: {str[0]}");
             }
         }
     }
