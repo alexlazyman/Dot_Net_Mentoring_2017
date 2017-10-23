@@ -1,20 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Task2_2
 {
-    public class Converter
+    public static class ConvertExtensions
     {
-        public int ToInt32(string str)
+        public static int ToInt32(this string str)
         {
             str = str?.Trim();
 
             if (string.IsNullOrEmpty(str))
             {
-                throw new ArgumentException("Digits are required", nameof(str));
+                throw new ArgumentException("String is empty", nameof(str));
             }
 
             var skipFirstChar = str[0] == '-' || str[0] == '+';

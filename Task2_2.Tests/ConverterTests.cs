@@ -1,29 +1,17 @@
-﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using NUnit.Framework;
 
 namespace Task2_2.Tests
 {
     [TestFixture]
     public class ConverterTests
     {
-        private Converter _converter;
-
-        [SetUp]
-        public void Init()
-        {
-            _converter = new Converter();
-        }
-
         [Test]
         [TestCase("2147483647", 2147483647)]
         [TestCase("0", 0)]
         public void ToInt32_PositiveInt_ExpectedConvertedInt(string input, int expectedOutput)
         {
-            var actualOutput = _converter.ToInt32(input);
+            var actualOutput = input.ToInt32();
 
             Assert.AreEqual(expectedOutput, actualOutput);
         }
@@ -33,7 +21,7 @@ namespace Task2_2.Tests
         [TestCase("+0", 0)]
         public void ToInt32_PositiveIntWithPlus_ExpectedConvertedInt(string input, int expectedOutput)
         {
-            var actualOutput = _converter.ToInt32(input);
+            var actualOutput = input.ToInt32();
 
             Assert.AreEqual(expectedOutput, actualOutput);
         }
@@ -43,7 +31,7 @@ namespace Task2_2.Tests
         [TestCase("-0", 0)]
         public void ToInt32_NegativeInt_ExpectedConvertedInt(string input, int expectedOutput)
         {
-            var actualOutput = _converter.ToInt32(input);
+            var actualOutput = input.ToInt32();
 
             Assert.AreEqual(expectedOutput, actualOutput);
         }
@@ -54,7 +42,7 @@ namespace Task2_2.Tests
         [TestCase("123   ", 123)]
         public void ToInt32_IntWithSpaces_ExpectedConvertedInt(string input, int expectedOutput)
         {
-            var actualOutput = _converter.ToInt32(input);
+            var actualOutput = input.ToInt32();
 
             Assert.AreEqual(expectedOutput, actualOutput);
         }
@@ -69,7 +57,7 @@ namespace Task2_2.Tests
         [TestCase(null)]
         public void ToInt32_EmptyString_ExpectedArgumentException(string input)
         {
-            Assert.Throws<ArgumentException>(() => _converter.ToInt32(input));
+            Assert.Throws<ArgumentException>(() => input.ToInt32());
         }
 
         [Test]
@@ -78,7 +66,7 @@ namespace Task2_2.Tests
         [TestCase("+1a")]
         public void ToInt32_DigitsWithLetters_ExpectedFormatException(string input)
         {
-            Assert.Throws<FormatException>(() => _converter.ToInt32(input));
+            Assert.Throws<FormatException>(() => input.ToInt32());
         }
 
         [Test]
@@ -86,7 +74,7 @@ namespace Task2_2.Tests
         [TestCase("-1111111111111")]
         public void ToInt32_LargeInteger_ExpectedOverflowException(string input)
         {
-            Assert.Throws<OverflowException>(() => _converter.ToInt32(input));
+            Assert.Throws<OverflowException>(() => input.ToInt32());
         }
     }
 }
