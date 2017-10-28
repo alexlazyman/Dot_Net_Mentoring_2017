@@ -12,6 +12,9 @@ namespace Task3.Tests
     [TestFixture]
     public class LinqTests
     {
+        private const decimal AverageCustomerTotal = 14222.393932584269662921348315M;
+        private const decimal AverageOrderTotal = 1158.0510175700020780629472474M;
+
         private List<Product> _products;
         private List<Supplier> _suppliers;
         private List<Customer> _customers;
@@ -28,7 +31,7 @@ namespace Task3.Tests
         [Description("Выдайте список всех клиентов, чей суммарный оборот (сумма всех заказов) превосходит некоторую величину X.")]
         public async Task Linq1()
         {
-            decimal x = _customers.Where(c => c.Orders.Any()).Average(c => c.Orders.Sum(o => o.Total));
+            decimal x = AverageCustomerTotal;
 
             var filteredCustomersRequest = _customers.Where(c => c.Orders.Sum(o => o.Total) > x);
 
@@ -76,7 +79,7 @@ namespace Task3.Tests
         [Description("Найдите всех клиентов, у которых были заказы, превосходящие по сумме величину X.")]
         public async Task Linq3()
         {
-            decimal x = _customers.Where(c => c.Orders.Any()).Average(c => c.Orders.Average(o => o.Total));
+            decimal x = AverageOrderTotal;
 
             var filteredCustomersRequest = _customers.Where(c => c.Orders.Any(o => o.Total > x));
 
