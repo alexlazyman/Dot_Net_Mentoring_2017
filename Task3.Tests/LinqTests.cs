@@ -110,22 +110,22 @@ namespace Task3.Tests
         [Description("Сделайте предыдущее задание, но выдайте список отсортированным по году, месяцу, оборотам клиента (от максимального к минимальному) и имени клиента.")]
         public async Task Linq5()
         {
-            var request = _customers.Where(c => c.Orders.Any())
+            var request = _customers
                 .Select(c => new
                 {
                     CustomerID = c.CustomerID,
                     CustomerName = c.CompanyName,
-                    Total = c.Orders.Sum(o => o.Total),
-                    FirstOrderDate = c.Orders.Min(o => o.OrderDate)
+                    Total = c.Orders.Any() ? c.Orders.Sum(o => o.Total) : 0,
+                    FirstOrderDate = c.Orders.Any() ? c.Orders.Min(o => o.OrderDate) : (DateTime?)null
                 })
-                .OrderBy(d => d.FirstOrderDate.Year)
-                .ThenBy(d => d.FirstOrderDate.Month)
-                .ThenBy(d => d.Total)
+                .OrderBy(d => d.FirstOrderDate?.Year)
+                .ThenBy(d => d.FirstOrderDate?.Month)
+                .ThenByDescending(d => d.Total)
                 .ThenBy(d => d.CustomerName);
 
             foreach (var data in request)
             {
-                await TestContext.Out.WriteLineAsync($"{data.CustomerID} - {data.FirstOrderDate} ({data.FirstOrderDate.Year}, {data.FirstOrderDate.Month}, {data.Total}, {data.CustomerName})");
+                await TestContext.Out.WriteLineAsync($"{data.CustomerID} - {data.FirstOrderDate?.Year}, {data.FirstOrderDate?.Month}, {data.Total}, {data.CustomerName}");
             }
         }
 
