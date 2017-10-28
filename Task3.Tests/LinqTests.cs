@@ -94,10 +94,10 @@ namespace Task3.Tests
         [Description("Выдайте список клиентов с указанием, начиная с какого месяца какого года они стали клиентами (принять за таковые месяц и год самого первого заказа).")]
         public async Task Linq4()
         {
-            var request = _customers.Where(c => c.Orders.Any()).Select(c => new
+            var request = _customers.Select(c => new
             {
                 CustomerID = c.CustomerID,
-                FirstOrderDate = c.Orders.Min(o => o.OrderDate)
+                FirstOrderDate = c.Orders.Any() ? c.Orders.Min(o => o.OrderDate) : (DateTime?)null
             });
 
             foreach (var data in request)
