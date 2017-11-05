@@ -1,0 +1,36 @@
+﻿using System;
+using System.Globalization;
+using System.Text;
+using System.Threading;
+using Task4.Configuration;
+
+namespace Task4.ConsoleApp
+{
+    public class Program
+    {
+        private static void Main(string[] args)
+        {
+            Console.OutputEncoding = Encoding.UTF8;
+
+            if (args.Length > 0 && !string.IsNullOrEmpty(args[0]))
+            {
+                var culture = CultureInfo.GetCultureInfo(args[0]);
+
+                Thread.CurrentThread.CurrentCulture = culture;
+                Thread.CurrentThread.CurrentUICulture = culture;
+            }
+
+            var config = WatchManagerConfig.GetConfiguration();
+            var logger = new ConsoleLogger();
+
+            IWatchManager watchManager = new WatchManager(config, logger);
+
+            watchManager.EnableWatching();
+
+            while (true)
+            {
+                Console.ReadKey();
+            }
+        }
+    }
+}
