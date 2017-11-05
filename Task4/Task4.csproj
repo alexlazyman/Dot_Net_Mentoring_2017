@@ -47,6 +47,7 @@
     <Compile Include="Configuration\WatchManagerConfig.cs" />
     <Compile Include="Configuration\Watcher.cs" />
     <Compile Include="Configuration\WatcherCollection.cs" />
+    <Compile Include="CopyOptions.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="IWatchManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -10,6 +10,9 @@ namespace Task4
 {
     public class WatchManager : IWatchManager
     {
+        private readonly CopyOptions _copyOptions;
+        private readonly string _dateTimeFormat;
+
         private readonly ILogger _logger;
         private readonly FileSystemWatcher[] _watchers;
         private readonly Dictionary<Regex, string> _rules;
@@ -29,11 +32,15 @@ namespace Task4
             _logger = logger;
 
             _watchers = config.Watchers.Select(w => new FileSystemWatcher(w.Path)).ToArray();
-            _rules = config.Rules.ToDictionary(r => ConvertFileMaskToRegex(r.Filter), r => r.DestPath ?? config.Rules.DefaultDestPath);
+            _rules = config.Rules.ToDictionary(r => new Regex(r.Filter), r => r.DestPath ?? config.Rules.DefaultDestPath);
+            _copyOptions = config.CopyOptions;
+            _dateTimeFormat = config.DateTimeFormat;
 
             foreach (var watcher in _watchers)
             {
-                watcher.Created += NewFileDetected;
+                watcher.Created += FileDetected;
+                watcher.Changed += FileDetected;
+                watcher.Renamed += FileDetected;
             }
         }
 
@@ -55,7 +62,7 @@ namespace Task4
             }
         }
 
-        private void NewFileDetected(object sender, FileSystemEventArgs args)
+        private void FileDetected(object sender, FileSystemEventArgs args)
         {
             _logger.Log(Resources.FileDetected, args.Name);
 
@@ -65,22 +72,36 @@ namespace Task4
 
             foreach (var rule in matchedRules)
             {
-                _logger.Log(Resources.FileCopyToStart, args.Name, rule.Value);
-                File.Copy(args.FullPath, Path.Combine(rule.Value, args.Name), true);
-                _logger.Log(Resources.FileCopyToEnd, args.Name, rule.Value);
+                var fileName = TransformFileName(args.Name, rule.Value, _copyOptions);
+                var destPath = Path.Combine(rule.Value, fileName);
+
+                _logger.Log(Resources.FileCopyToStart, args.FullPath, destPath);
+
+                File.Copy(args.FullPath, destPath, true);
+
+                _logger.Log(Resources.FileCopyToEnd, args.FullPath, destPath);
             }
         }
 
-        private Regex ConvertFileMaskToRegex(string fileMask)
+        private string TransformFileName(string fileName, string destPath, CopyOptions copyOptions)
         {
-            return new Regex(
-                '^' +
-                fileMask
-                    .Replace(".", "[.]")
-                    .Replace("*", ".*")
-                    .Replace("?", ".")
-                + '$',
-                RegexOptions.IgnoreCase);
+            switch (copyOptions)
+            {
+                case CopyOptions.DateTime:
+                    return fileName += "-" + DateTime.Now.ToString(_dateTimeFormat);
+                case CopyOptions.Index:
+                    for (int i = 0; i < int.MaxValue; i++)
+                    {
+                        var path = Path.Combine(destPath, fileName + "-" + i);
+                        if (!File.Exists(path))
+                        {
+                            return fileName + "-" + i;
+                        }
+                    }
+                    return fileName + "-" + int.MaxValue;
+                default:
+                    return fileName;
+            }
         }
     }
 }

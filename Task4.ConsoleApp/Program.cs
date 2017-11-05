@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Globalization;
 using System.Text;
 using System.Threading;
@@ -12,13 +13,18 @@ namespace Task4.ConsoleApp
         {
             Console.OutputEncoding = Encoding.UTF8;
 
-            if (args.Length > 0 && !string.IsNullOrEmpty(args[0]))
+            try
             {
-                var culture = CultureInfo.GetCultureInfo(args[0]);
+                var culture = new CultureInfo(ConfigurationManager.AppSettings["Culture"]);
 
                 Thread.CurrentThread.CurrentCulture = culture;
                 Thread.CurrentThread.CurrentUICulture = culture;
             }
+            catch
+            {
+                // Ignored
+            }
+
 
             var config = WatchManagerConfig.GetConfiguration();
             var logger = new ConsoleLogger();
