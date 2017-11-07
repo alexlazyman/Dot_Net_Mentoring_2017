@@ -31,16 +31,21 @@ namespace Task4
 
             _logger = logger;
 
-            _watchers = config.Watchers.Select(w => new FileSystemWatcher(w.Path)).ToArray();
-            _rules = config.Rules.ToDictionary(r => new Regex(r.Filter), r => r.DestPath ?? config.Rules.DefaultDestPath);
+            _watchers = config.Watchers
+                .Where(w => new DirectoryInfo(w.Path).Exists)
+                .Select(w => new FileSystemWatcher(w.Path))
+                .ToArray();
+
+            _rules = config.Rules.ToDictionary(
+                r => new Regex(r.Filter),
+                r => string.IsNullOrEmpty(r.DestPath) ? config.Rules.DefaultDestPath : r.DestPath);
+
             _copyOptions = config.CopyOptions;
             _dateTimeFormat = config.DateTimeFormat;
 
             foreach (var watcher in _watchers)
             {
                 watcher.Created += FileDetected;
-                watcher.Changed += FileDetected;
-                watcher.Renamed += FileDetected;
             }
         }
 
@@ -77,7 +82,12 @@ namespace Task4
 
                 _logger.Log(Resources.FileCopyToStart, args.FullPath, destPath);
 
-                File.Copy(args.FullPath, destPath, true);
+                if (File.Exists(destPath))
+                {
+                    File.Delete(destPath);
+                }
+
+                File.Move(args.FullPath, destPath);
 
                 _logger.Log(Resources.FileCopyToEnd, args.FullPath, destPath);
             }
