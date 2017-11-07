@@ -22,7 +22,7 @@ namespace Task4.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace Task4.Properties {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Task4.Properties.Resources", typeof(Resources).Assembly);
@@ -51,7 +51,7 @@ namespace Task4.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace Task4.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Copying of file {0} to {1} is finished.
         /// </summary>
-        internal static string FileCopyToEnd {
+        public static string FileCopyToEnd {
             get {
                 return ResourceManager.GetString("FileCopyToEnd", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace Task4.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Copying file {0} to {1}.
         /// </summary>
-        internal static string FileCopyToStart {
+        public static string FileCopyToStart {
             get {
                 return ResourceManager.GetString("FileCopyToStart", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace Task4.Properties {
         /// <summary>
         ///   Looks up a localized string similar to File detected: {0}.
         /// </summary>
-        internal static string FileDetected {
+        public static string FileDetected {
             get {
                 return ResourceManager.GetString("FileDetected", resourceCulture);
             }
@@ -90,7 +90,7 @@ namespace Task4.Properties {
         /// <summary>
         ///   Looks up a localized string similar to {0} rule(s) for file {1} detected.
         /// </summary>
-        internal static string RulesForFileDetected {
+        public static string RulesForFileDetected {
             get {
                 return ResourceManager.GetString("RulesForFileDetected", resourceCulture);
             }
@@ -99,7 +99,7 @@ namespace Task4.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Start file watching.
         /// </summary>
-        internal static string StartWatching {
+        public static string StartWatching {
             get {
                 return ResourceManager.GetString("StartWatching", resourceCulture);
             }

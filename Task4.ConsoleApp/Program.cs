@@ -17,8 +17,8 @@ namespace Task4.ConsoleApp
             {
                 var culture = new CultureInfo(ConfigurationManager.AppSettings["Culture"]);
 
-                Thread.CurrentThread.CurrentCulture = culture;
-                Thread.CurrentThread.CurrentUICulture = culture;
+                CultureInfo.DefaultThreadCurrentCulture = culture;
+                CultureInfo.DefaultThreadCurrentUICulture = culture;
             }
             catch
             {
