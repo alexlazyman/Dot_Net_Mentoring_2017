@@ -44,20 +44,22 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Task5.Model1\Task5.Model1.csproj">
-      <Project>{a757ace5-8de6-425a-9bae-b09252c94260}</Project>
-      <Name>Task5.Model1</Name>
+    <ProjectReference Include="..\Task5.Tests.Model1\Task5.Tests.Model1.csproj">
+      <Project>{600a5d69-f140-413f-95ec-71556f28e108}</Project>
+      <Name>Task5.Tests.Model1</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Task5.Model2\Task5.Model2.csproj">
-      <Project>{ed0c2060-bcd7-41ba-8465-2807729780c2}</Project>
-      <Name>Task5.Model2</Name>
+    <ProjectReference Include="..\Task5.Tests.Model2\Task5.Tests.Model2.csproj">
+      <Project>{0fc913fc-cf10-4f73-bf7d-96c3e1fe1b08}</Project>
+      <Name>Task5.Tests.Model2</Name>
     </ProjectReference>
     <ProjectReference Include="..\Task5\Task5.csproj">
       <Project>{2a79c5e2-be33-4340-bfb5-7249f6161155}</Project>
       <Name>Task5</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

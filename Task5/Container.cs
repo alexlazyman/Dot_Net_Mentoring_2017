@@ -6,7 +6,7 @@ using Task5.Attributes;
 
 namespace Task5
 {
-    public class Container
+    public class Container : IContainer
     {
         private readonly Dictionary<Type, Type> _maps;
 
@@ -19,11 +19,11 @@ namespace Task5
         {
             if (assembly == null)
             {
-                return;
+                throw new ArgumentNullException(nameof(assembly));
             }
 
             var maps = assembly.DefinedTypes
-                .Where(HasContainerAttributtes)
+                .Where(HasCreatableAttributes)
                 .SelectMany(GetMaps);
 
             foreach (var map in maps)
@@ -34,11 +34,31 @@ namespace Task5
 
         public void AddType(Type type)
         {
-            _maps.Add(type, type);
+            AddType(type, type);
         }
 
         public void AddType(Type type, Type baseType)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            if (baseType == null)
+            {
+                throw new ArgumentNullException(nameof(baseType));
+            }
+
+            if (baseType.IsSubclassOf(type))
+            {
+                throw new ArgumentException($"{nameof(type)} is not subclass of {nameof(baseType)}");
+            }
+
+            if (!IsInstantiatableType(type))
+            {
+                throw new ArgumentException($"It is not instantiatable type");
+            }
+
             _maps.Add(baseType, type);
         }
 
@@ -51,7 +71,7 @@ namespace Task5
 
             var targetType = _maps[type];
 
-            var targetCtor = targetType.GetConstructors().First();
+            var targetCtor = targetType.GetConstructors().Single();
             var args = targetCtor.GetParameters().Select(p => CreateInstance(p.ParameterType)).ToArray();
 
             var instance = Activator.CreateInstance(targetType, args);
@@ -72,10 +92,14 @@ namespace Task5
             return (T)CreateInstance(typeof(T));
         }
 
-        private bool HasContainerAttributtes(Type type)
+        private bool IsInstantiatableType(Type type)
         {
-            return type.GetCustomAttributes<ImportAttribute>().Any()
-                || type.GetCustomAttributes<ImportConstructorAttribute>().Any()
+            return (type.IsClass && !type.IsAbstract) || type.IsValueType;
+        }
+
+        private bool HasCreatableAttributes(Type type)
+        {
+            return type.GetCustomAttributes<ImportConstructorAttribute>().Any()
                 || type.GetCustomAttributes<ExportAttribute>().Any();
         }
 
