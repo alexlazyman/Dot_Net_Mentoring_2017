@@ -48,10 +48,6 @@
       <Project>{600a5d69-f140-413f-95ec-71556f28e108}</Project>
       <Name>Task5.Tests.Model1</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Task5.Tests.Model2\Task5.Tests.Model2.csproj">
-      <Project>{0fc913fc-cf10-4f73-bf7d-96c3e1fe1b08}</Project>
-      <Name>Task5.Tests.Model2</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Task5\Task5.csproj">
       <Project>{2a79c5e2-be33-4340-bfb5-7249f6161155}</Project>
       <Name>Task5</Name>

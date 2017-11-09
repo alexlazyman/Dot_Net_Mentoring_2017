@@ -10,13 +10,11 @@ namespace Task5.Tests
     {
         private Container _container;
         private Assembly _model1Assembly;
-        private Assembly _model2Assembly;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
             _model1Assembly = Assembly.Load("Task5.Tests.Model1");
-            _model2Assembly = Assembly.Load("Task5.Tests.Model2");
         }
 
         [SetUp]
