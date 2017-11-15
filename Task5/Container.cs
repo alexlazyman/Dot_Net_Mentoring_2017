@@ -49,9 +49,9 @@ namespace Task5
                 throw new ArgumentNullException(nameof(baseType));
             }
 
-            if (baseType.IsSubclassOf(type))
+            if (!baseType.IsAssignableFrom(type))
             {
-                throw new ArgumentException($"{nameof(type)} is not subclass of {nameof(baseType)}");
+                throw new ArgumentException($"{nameof(baseType)} is not assignable from {nameof(type)}");
             }
 
             if (!IsInstantiatableType(type))
